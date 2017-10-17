@@ -3,20 +3,22 @@ apiVersion: v1
 metadata:
   name: jenkins
   labels:
-    type: local
+    type: amazonEBS
 spec:
   capacity:
     storage: 2Gi
   accessModes:
     - ReadWriteOnce
-  hostPath:
-    path: "/data/jenkins/"
-
+  awsElasticBlockStore:
+    volumeID: vol-07693e78cd6f15d27
+    fsType: ext4
 ---
 kind: PersistentVolumeClaim
 apiVersion: v1
 metadata:
   name: jenkins-claim
+  labels:
+    type: amazonEBS
 spec:
   accessModes:
     - ReadWriteOnce
@@ -55,7 +57,7 @@ spec:
         tier: jenkins
     spec:
       containers:
-      - image: chadmoon/jenkins-docker-kubectl:latest
+      - image: bjarteb/jenkins-kube:latest
         name: jenkins
         securityContext:
           privileged: true
@@ -64,9 +66,11 @@ spec:
           name: jenkins
         volumeMounts:
         - name: jenkins-persistent-storage
-          mountPath: /root/.jenkins
+          mountPath: /var/jenkins_home
         - name: docker
           mountPath: /var/run/docker.sock
+      imagePullSecrets:
+      - name: regsecret
       volumes:
       - name: docker
         hostPath:
@@ -74,3 +78,5 @@ spec:
       - name: jenkins-persistent-storage
         persistentVolumeClaim:
           claimName: jenkins-claim
+      securityContext:
+        fsGroup: 1000
