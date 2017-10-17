@@ -1,9 +1,7 @@
 node {
-
-    checkout scm
-
+    def app
     env.DOCKER_API_VERSION="1.23"
-    
+
     sh "git rev-parse --short HEAD > commit-id"
 
     tag = readFile('commit-id').replace("\n", "").replace("\r", "")
@@ -13,12 +11,18 @@ node {
     env.BUILDIMG=imageName
 
     stage "Build"
-    
-        sh "docker build -t ${imageName} -f applications/hello-kenzan/Dockerfile applications/hello-kenzan"
-    
+
+        app = docker.build("${imageName}", "-f applications/hello-kenzan/Dockerfile applications/hello-kenzan" )
+        // sh "docker build -t ${imageName} -f applications/hello-kenzan/Dockerfile applications/hello-kenzan"
+
     stage "Push"
 
-        sh "docker push ${imageName}"
+        docker.withRegistry('', 'docker-hub-credentials') {
+          app.push()    
+        }
+
+        // sh "docker login --username VAR_USERNAME --password VAR_PASSWORD"
+        // sh "docker push ${imageName}"
 
     stage "Deploy"
 
