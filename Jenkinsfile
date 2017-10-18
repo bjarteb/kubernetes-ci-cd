@@ -2,6 +2,8 @@ node {
     def app
     env.DOCKER_API_VERSION="1.23"
 
+    checkout scm
+
     sh "git rev-parse --short HEAD > commit-id"
 
     tag = readFile('commit-id').replace("\n", "").replace("\r", "")
