@@ -8,7 +8,7 @@ node {
 
     tag = readFile('commit-id').replace("\n", "").replace("\r", "")
     appName = "hello-kenzan"
-    registryHost = "bjarteb/"
+    registryHost = "docker.io/"
     imageName = "${registryHost}${appName}:${tag}"
     env.BUILDIMG=imageName
 
@@ -19,7 +19,7 @@ node {
 
     stage "Push"
 
-        docker.withRegistry('', 'docker-hub-credentials') {
+        docker.withRegistry('docker.io', 'docker-hub-credentials') {
           app.push()    
         }
 
